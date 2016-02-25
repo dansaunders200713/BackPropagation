@@ -1,5 +1,6 @@
 from __future__ import print_function
 import theano, theano.tensor as T, numpy, os, gzip, cPickle as pickle, timeit, sys
+from matplotlib import pyplot as plt
 
 __docformat__ = 'restructedtext en'
 
@@ -360,6 +361,26 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, num_epochs=1000, da
 			'obtained at iteration %i, with test performance %f %%') % (
 			best_validation_loss * 100., best_iteration + 1, test_score * 100.))
 
+	return best_validation_loss, test_score
 
 if __name__ == '__main__':
-	test_mlp()
+	neurons = [2, 5, 10, 50, 100, 200, 400]
+	valid_losses = []
+	test_losses = []
+
+	for neuron in neurons:
+		valid_loss, test_loss = test_mlp(num_hidden = neuron, num_epochs = 10)
+		valid_losses.append(valid_loss)
+		test_losses.append(test_loss)
+
+	batches = [5, 10, 50, 100, 200, 400]
+	valid_losses = []
+	test_losses = []
+
+	for batch in batches:
+		valid_loss, test_loss = test_mlp(batch_size = batch, num_epochs = 10)
+		valid_losses.append(valid_loss)
+		test_losses.append(test_loss)
+
+	
+
