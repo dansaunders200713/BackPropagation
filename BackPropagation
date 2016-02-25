@@ -139,7 +139,7 @@ class MLP(object):
     Multi-Layer Perceptron Class
     """
 
-	def __init__(self, random_number_generator, input, num_inputs, num_hidden, num_outputs):
+	def __init__(self, random_number_generator, input, num_inputs, num_hidden, num_outputs, num_hidden_layers):
 		""" initializing parameters for the multilayer perceptron
 
         :param random_number_generator: a random number generator used to initialize network weights
@@ -153,6 +153,7 @@ class MLP(object):
 		# We are implementing a perceptron with one hidden layer, and so the entire netowrk will consist
 		# of a HiddenLayer with the tanh activation function, connected to a LogisticRegression layer, where the
 		# activation function can be replaced with any other nonlinear function.
+
 		self.hiddenLayer = HiddenLayer(random_number_generator=random_number_generator, input=input,
 		                               num_inputs=num_inputs, num_outputs=num_hidden, activation=T.tanh)
 
@@ -265,7 +266,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, num_epochs=1000, da
 
 	# construct the MLP class
 	classifier = MLP(random_number_generator=random_number_generator, input=x, num_inputs=28 * 28,
-	                 num_hidden=num_hidden, num_outputs=10)
+	                 num_hidden=num_hidden, num_outputs=10, num_hidden_layers=num_hidden_layers)
 
 	# the cost we minimize during training is the negative log likelihood of
 	# the model plus the regularization terms (L1 and L2); cost is expressed
