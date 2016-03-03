@@ -139,7 +139,7 @@ class MLP(object):
     Multi-Layer Perceptron Class
     """
 
-	def __init__(self, random_number_generator, input, num_inputs, num_hidden, num_outputs, num_hidden_layers):
+	def __init__(self, random_number_generator, input, num_inputs, num_hidden, num_outputs):
 		""" initializing parameters for the multilayer perceptron
 
         :param random_number_generator: a random number generator used to initialize network weights
@@ -180,7 +180,7 @@ class MLP(object):
 		self.input = input
 
 
-def load_data(dataset):
+def load_data(dataset, num_examples):
 	"""
 
     This function loads the dataset we use for stochastic gradient descent.
@@ -213,8 +213,10 @@ def load_data(dataset):
 		except:
 			train_set, valid_set, test_set = pickle.load(f)
 
-	def shared_dataset(data_xy, borrow=True):
+	def shared_dataset(data_xy, borrow=True, num_ex=10000):
 		data_x, data_y = data_xy
+		data_x = data_x[0:num_ex]
+		data_y = data_y[0:num_ex]
 
 		shared_x = theano.shared(numpy.asarray(data_x, dtype=theano.config.floatX), borrow=borrow)
 		shared_y = theano.shared(numpy.asarray(data_y, dtype=theano.config.floatX), borrow=borrow)
@@ -223,13 +225,13 @@ def load_data(dataset):
 
 	test_set_x, test_set_y = shared_dataset(test_set)
 	valid_set_x, valid_set_y = shared_dataset(valid_set)
-	train_set_x, train_set_y = shared_dataset(train_set)
+	train_set_x, train_set_y = shared_dataset(train_set, num_ex=num_examples)
 
 	sets = [(train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y)]
 	return sets
 
 
-def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, num_epochs=1000, dataset='mnist.pkl.gz', batch_size=20, num_hidden=500):
+def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, num_epochs=1000, dataset='mnist.pkl.gz', batch_size=20, num_hidden=500, num_examples = 50000):
 	"""
 	We demonstrate stochastic gradient descent on the MNIST data set.
 
@@ -243,7 +245,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, num_epochs=1000, da
 
 	"""
 
-	datasets = load_data(dataset)
+	datasets = load_data(dataset, num_examples)
 
 	train_set_x, train_set_y = datasets[0]
 	valid_set_x, valid_set_y = datasets[1]
@@ -266,7 +268,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, num_epochs=1000, da
 
 	# construct the MLP class
 	classifier = MLP(random_number_generator=random_number_generator, input=x, num_inputs=28 * 28,
-	                 num_hidden=num_hidden, num_outputs=10, num_hidden_layers=num_hidden_layers)
+	                 num_hidden=num_hidden, num_outputs=10)
 
 	# the cost we minimize during training is the negative log likelihood of
 	# the model plus the regularization terms (L1 and L2); cost is expressed
@@ -386,19 +388,19 @@ if __name__ == '__main__':
 		plt.show()
 
 	if trial == 2:
-		batches = [5, 10, 50, 100, 200, 400]
+		examples = [100, 500, 1000, 10000, 25000, 50000]
 		valid_losses = []
 		test_losses = []
 
-		for batch in batches:
-			valid_loss, test_loss = test_mlp(batch_size = batch, num_epochs = 10, num_hidden = 100)
+		for example in examples:
+			valid_loss, test_loss = test_mlp(num_epochs = 10, num_hidden = 100, num_examples = example)
 			valid_losses.append(valid_loss)
 			test_losses.append(test_loss)
 
-		plt.semilogx(batches, valid_losses, 'rs', label = 'Batches vs. Validation Loss', linestyle='solid')
-		plt.semilogx(batches, test_losses, 'bs', label = 'Batches vs. Test Loss', linestyle='solid')
-		plt.title('Batch Size vs. Validation / Test Loss for 10 Epochs')
-		plt.xlabel('Batch Size')
+		plt.semilogx(examples, valid_losses, 'rs', label = 'Batches vs. Validation Loss', linestyle='solid')
+		plt.semilogx(examples, test_losses, 'bs', label = 'Batches vs. Test Loss', linestyle='solid')
+		plt.title('Number of Examples vs. Validation / Test Loss for 10 Epochs')
+		plt.xlabel('Example Set Size')
 		plt.ylabel('Loss')
 		plt.legend(loc='upper right', shadow=True, fontsize='small')
 		plt.show()
